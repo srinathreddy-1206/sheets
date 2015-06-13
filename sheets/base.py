@@ -46,10 +46,14 @@ class Row(metaclass=RowMeta):
                 value = None
             setattr(self, column.name, value)
 
+
     @classmethod
     def reader(cls, file):
         return Reader(cls, file)
 
+    @classmethod
+    def writer(cls, file):
+        return Writer(file, cls._dialect)
 import csv
 class Reader(object):
     def __init__(self, row_cls, file):
@@ -67,3 +71,22 @@ class Reader(object):
         return self.row_cls(*self.csv_reader.__next__())
 
     next = __next__
+
+class Writer(object):
+    def __init__(self, file, dialect):
+        self.columns = dialect.columns
+        self._writer = csv.writer(file, dialect.csv_dialect)
+        self.needs_header_row = dialect.has_header_row
+
+    def writerow(self, row):
+        #take a row object and write that  to output file
+        if self.needs_header_row:
+            values = [column.title.title() for column in self.columns]
+            self._writer.writerow(values)
+            self.needs_header_row = False
+        values = [getattr(row, column.name) for column in self.columns]
+        self._writer.writerow(values)
+
+    def writerows(self, rows):
+        for row in rows:
+            self.writerow(row)

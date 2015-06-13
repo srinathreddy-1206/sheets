@@ -26,14 +26,18 @@ class SheetsTest(unittest.TestCase):
         self.assertEqual(author.name, 'Marty Alchin')
         self.assertEqual(author.birthdate, datetime.date(1981,12,17))
         self.assertEqual(author.age, 28)
-    def test_sample_csv_file_read(self):
+    def test_sample_csv_file_read_and_write(self):
         class Content(sheets.Row):
             chapter = sheets.IntegerColumn()
             title = sheets.StringColumn()
         with open('sample.csv', 'r') as f:
-            print ('\n')
-            for entry in Content.reader(f):
-                print ("%s: %s" %(entry.chapter, entry.title))
+            reader = Content.reader(f)
+            with open('output.csv', 'w') as o:
+                writer = Content.writer(o)
+                writer.writerows(reader)
+        with open('sample.csv', 'r') as first:
+            with open('output.csv', 'r') as second:
+                self.assertEqual(first.read(), second.read())
     def tearDown(self):
         pass
 
