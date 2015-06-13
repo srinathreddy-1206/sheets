@@ -1,4 +1,7 @@
 from __future__ import print_function
+"""
+Compatible with: 3.x,
+"""
 
 class Column(object):
     """
@@ -48,12 +51,14 @@ class IntegerColumn(Column):
     def to_python(self, value):
         return int(value)
 
+
 class FloatColumn(Column):
     """
     A Column that contains data in the form of floating point numbers.
     """
     def to_python(self, value):
         return float(value)
+
 import decimal
 class DecimalColumn(Column):
     """
@@ -65,6 +70,7 @@ class DecimalColumn(Column):
             return decimal.Decimal(value)
         except decimal.InvalidOperation as e:
             raise ValueError(str(e))
+
 import datetime
 class DateColumn(Column):
     """
