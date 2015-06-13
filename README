@@ -22,7 +22,8 @@ USAGE:
 3: Functions
 4: Classes
 5: Protocols
-6: Object Managem    
+
+
 >>> input = open('contents.csv', 'r')
 >>> reader = Content.reader(file)
 >>> output = open('compare.csv', 'w')
