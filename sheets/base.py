@@ -19,7 +19,9 @@ class RowMeta(type):
         super(RowMeta, cls).__init__(name, bases, attrs)
 
 
-class Row(object, metaclass=RowMeta):
+class Row(metaclass=RowMeta):
+
+    __metaclass__ = RowMeta
     def __init__(self, *args, **kwargs):
         #First, make sure the arguments make sense
         column_names = [column.name for column in self._dialect.columns]
@@ -44,5 +46,24 @@ class Row(object, metaclass=RowMeta):
                 value = None
             setattr(self, column.name, value)
 
-    #__metaclass__ = RowMeta
-    pass
+    @classmethod
+    def reader(cls, file):
+        return Reader(cls, file)
+
+import csv
+class Reader(object):
+    def __init__(self, row_cls, file):
+        self.row_cls = row_cls
+        self.csv_reader = csv.reader(file, **row_cls._dialect.csv_dialect)
+        self.skip_header_row = row_cls._dialect.has_header_row
+    def __iter__(self):
+        return self
+    def __next__(self):
+        if self.skip_header_row:
+            #Skip the first row if it's a header
+            self.csv_reader.__next__()
+            self.skip_header_row=False
+
+        return self.row_cls(*self.csv_reader.__next__())
+
+    next = __next__
