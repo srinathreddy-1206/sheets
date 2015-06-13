@@ -6,9 +6,26 @@ Framework To Work/Interact with CSV and Excel Sheets
 
 USAGE:
 ==========================================================
-import sheets 
-class EmployeeSheet(sheets.Row): 
-    first_name = sheets.StringColumn() 
-    last_name = sheets.StringColumn() 
-    hire_date = sheets.DateColumn() 
-    salary = sheets.CurrencyColumn(decimal_places=2)
+>>> import sheets 
+
+>>> class Contents(sheets.Row):
+...     chapter = sheets.IntegerColumn()
+...     title = sheets.StringColumn()
+
+>>> file = open('contents.csv')
+>>> for entry in Contents.reader(file):
+...     print ('%s: %s' %(entry.chapter, entry.title))
+...
+
+1: Principles and Philosophy
+2: Advanced Basics
+3: Functions
+4: Classes
+5: Protocols
+6: Object Managem    
+>>> input = open('contents.csv', 'r')
+>>> reader = Content.reader(file)
+>>> output = open('compare.csv', 'w')
+>>> writer = Content.writer(output)
+>>> writer.writerows(reader)
+
