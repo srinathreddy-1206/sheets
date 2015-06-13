@@ -35,3 +35,65 @@ class Column(object):
         """
         return value
 
+class StringColumn(Column):
+    """
+    A Column that contains data formatted as generic strings.
+    """
+    pass
+
+class IntegerColumn(Column):
+    """
+    A Column that contains data in the form of numeric integers.
+    """
+    def to_python(self, value):
+        return int(value)
+
+class FloatColumn(Column):
+    """
+    A Column that contains data in the form of floating point numbers.
+    """
+    def to_python(self, value):
+        return float(value)
+import decimal
+class DecimalColumn(Column):
+    """
+    A Column that contains data in the form of decimal values, represented
+    in python by decimal.Decimal
+    """
+    def to_python(self, value):
+        try:
+            return decimal.Decimal(value)
+        except decimal.InvalidOperation as e:
+            raise ValueError(str(e))
+import datetime
+class DateColumn(Column):
+    """
+    A Column that contains data in the form of dates,
+    represented in python by datetime.date
+
+    format
+        A strptime() - style format string.
+        See http://docs.python.org/library/datetime.html for details
+    """
+    def __init__(self, *args, **kwargs):
+
+        if 'format' in kwargs:
+            self.format = kwargs.pop('format')
+        else:
+            self.format = '%Y-%m-%d'
+        super(DateColumn, self).__init__(*args, **kwargs)
+
+    def to_python(self, value):
+        """
+        Parse a string value according to self.format
+        and return only the date portion
+        """
+        if isinstance(value, datetime.date):
+            return value
+        return datetime.datetime.strptime(value, self.format).date()
+    def to_string(self, value):
+        """
+        Format a date according to self.format and return that string.
+        """
+        return value.strftime(self.format)
+
