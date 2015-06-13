@@ -13,12 +13,36 @@ class RowMeta(type):
         cls._dialect = options.Dialect(**items)
         for key, attr in attrs.items():
             if hasattr(attr, 'attach_to_class'):
-                attr.attach_to_class(cls,name,cls._dialect)
+                attr.attach_to_class(cls,key,cls._dialect)
         #Sort the columns according to their order of instantiation
         cls._dialect.columns.sort(key = lambda column: column.counter)
         super(RowMeta, cls).__init__(name, bases, attrs)
 
 
 class Row(object, metaclass=RowMeta):
-    __metaclass__ = RowMeta
+    def __init__(self, *args, **kwargs):
+        #First, make sure the arguments make sense
+        column_names = [column.name for column in self._dialect.columns]
+        if len(args) > len(column_names):
+            msg = "__init__() takes at most %d arguments (%d given)"
+            raise TypeError(msg % (len(column_names), len(args)))
+        for name in kwargs:
+            if name not in column_names:
+                msg = "__init__() got an unexpected keyword argument '%s'"
+                raise TypeError(msg % name)
+        for i, name in enumerate(column_names[:len(args)]):
+            if name in kwargs:
+                msg = "__init__() got multiple values for keyword argument '%s'"
+                raise TypeError(msg % name)
+            kwargs[name]=args[i]
+        #Now populate the actual values on the object
+        for column in self._dialect.columns:
+            try:
+                value = column.to_python(kwargs[column.name])
+            except KeyError:
+                #No Value was provided
+                value = None
+            setattr(self, column.name, value)
+
+    #__metaclass__ = RowMeta
     pass
